@@ -8,6 +8,7 @@
 #include "EdibleSpriteActor.generated.h"
 
 class UPaperSprite;
+class UPhysicsHandleComponent;
 
 UCLASS()
 class EDIBLEGAME_API AEdibleSpriteActor : public APaperSpriteActor
@@ -19,17 +20,27 @@ public:
 
     bool GetIsEatable() const;
     void SetActorInfo(const FSpawnActorInfo* SpawnInfo) { SpawnActorInfo = SpawnInfo; }
-    
-    UFUNCTION()
-    UPaperSprite* GetEatableActorSprite();
+
+    UFUNCTION(BlueprintCallable, BlueprintPure, Category = "EdibleSpriteActor")
+    UPaperSprite* GetEatableActorSprite() const;
+
+    void StartToGrabActor(UPrimitiveComponent* Comp, FVector Location, ETouchIndex::Type FingerIndex, bool Grab = true);
+    void StopGrabActor(bool Grab = false);
+    void UpdateActorLocation();
 
 protected:
-    virtual void BeginPlay() override;
+    virtual void Tick(float DeltaTime) override;
 
-    //UPROPERTY(BlueprintReadOnly, Category = "EdibleSpriteActor")
     const FSpawnActorInfo* SpawnActorInfo = nullptr;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Components")
+    UPhysicsHandleComponent* PhysicsHandle;
+
+    UPROPERTY(EditDefaultsOnly, Category = "EdibleSpriteActor")
+    UPaperSprite* ItemSptite;
+
 private:
-    
-    bool Eatable = false;
+    FTimerHandle CarryTimerHandle;
+    ETouchIndex::Type Finger;
+    bool bCarried = false;
 };

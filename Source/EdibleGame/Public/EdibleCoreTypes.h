@@ -53,25 +53,9 @@ struct FSpawnActorInfo : public FTableRowBase
     bool bEatable;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Info")
-    UPaperSprite* ItemSptite;
+    UPaperSprite* ItemSptite = nullptr;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Info")
     EGameTheme GameTheme;
 };
 
-//class AEdibleSpriteActor;
-//
-//USTRUCT(BlueprintType)
-//struct FGrabedActor
-//{
-//    GENERATED_USTRUCT_BODY()
-//
-//    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Info")
-//    AEdibleSpriteActor* EdibleSpriteActor;
-//
-//    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Info")
-//    UPrimitiveComponent* HitComponent;
-//
-//    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Info")
-//    ETouchIndex::Type TouchIndex;
-//};

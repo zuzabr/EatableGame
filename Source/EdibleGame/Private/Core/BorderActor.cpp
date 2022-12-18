@@ -4,6 +4,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
 #include "PaperSprite.h"
+#include "PaperSpriteComponent.h"
 #include "Core/EdibleSpriteActor.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -14,13 +15,18 @@ ABorderActor::ABorderActor()
 
     Root = CreateDefaultSubobject<USceneComponent>("Root");
     SetRootComponent(Root);
-
-    BackSprite = CreateDefaultSubobject<UPaperSprite>("BackBorder");
+ 
+    BackgroundSprite = CreateDefaultSubobject<UPaperSpriteComponent>("BackgroundBorder");
+    BackgroundSprite->SetupAttachment(Root);
 
     LeftBorder = CreateDefaultSubobject<UBoxComponent>("LeftBorder");
+    LeftBorder->SetupAttachment(BackgroundSprite);
     RightBorder = CreateDefaultSubobject<UBoxComponent>("RightBorder");
+    RightBorder->SetupAttachment(BackgroundSprite);
     BottomBorder = CreateDefaultSubobject<UBoxComponent>("BottomBorder");
+    BottomBorder->SetupAttachment(BackgroundSprite);
     TopBorder = CreateDefaultSubobject<UBoxComponent>("TopBorder");
+    TopBorder->SetupAttachment(BackgroundSprite);
 
     LeftBorder->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
     LeftBorder->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -38,10 +44,15 @@ ABorderActor::ABorderActor()
     TopBorder->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
     SpawnPoint1 = CreateDefaultSubobject<USceneComponent>("SpawnPoint1");
+    SpawnPoint1->SetupAttachment(Root);
     SpawnPoint2 = CreateDefaultSubobject<USceneComponent>("SpawnPoint2");
+    SpawnPoint2->SetupAttachment(Root);
     SpawnPoint3 = CreateDefaultSubobject<USceneComponent>("SpawnPoint3");
+    SpawnPoint3->SetupAttachment(Root);
     SpawnPoint4 = CreateDefaultSubobject<USceneComponent>("SpawnPoint4");
+    SpawnPoint4->SetupAttachment(Root);
     SpawnPoint5 = CreateDefaultSubobject<USceneComponent>("SpawnPoint5");
+    SpawnPoint5->SetupAttachment(Root);
     
     SpawnPoints.Empty();
     SpawnPoints.Add(SpawnPoint1);
@@ -49,7 +60,8 @@ ABorderActor::ABorderActor()
     SpawnPoints.Add(SpawnPoint3);
     SpawnPoints.Add(SpawnPoint4);
     SpawnPoints.Add(SpawnPoint5);
-// Maybe loop will be used
+
+   
     
 }
 
@@ -64,6 +76,8 @@ void ABorderActor::BeginPlay()
     //*************************************************Initial Settings**********************************
     ApplyGameSettings(CurrentGameTheme, true);
     SetFallingActorsToSpawn(CurrentGameTheme);
+
+    StartSpawnObjects();
 }
 
 void ABorderActor::ApplyGameSettings(EGameTheme GameTheme, bool EatableIsOnTheLeft)
@@ -119,7 +133,7 @@ void ABorderActor::SpawnObjects()
     if (!SpawnPoints.IsValidIndex(RandomPoint)) return;
 
     if (!GetWorld()) return;
-        
+   
     const auto Actor = GetWorld()->SpawnActorDeferred<AEdibleSpriteActor>(EdibleSpriteClass, SpawnPoints[RandomPoint]->GetComponentTransform());
     if (Actor)
     {
@@ -135,8 +149,8 @@ void ABorderActor::OnLeftRightBorderBeginOverlap(UPrimitiveComponent* Overlapped
 {
     const auto OverlappedActor = Cast<AEdibleSpriteActor>(OtherActor);
     if (!OverlappedActor) return;
-
-//*****************************Actor overlap left border******************************
+    
+    //*****************************Actor overlap left border******************************
     if(LeftBorder->IsOverlappingActor(OverlappedActor))
     {
         const auto ActorIsEatable = OverlappedActor->GetIsEatable();
@@ -162,7 +176,7 @@ void ABorderActor::OnLeftRightBorderBeginOverlap(UPrimitiveComponent* Overlapped
                 UE_LOG(LogTemp, Display, TEXT("You are Right!"));
             }
         }
-        
+        OverlappedActor->SetLifeSpan(2.f);//Change
         return;
     }
 //*****************************Actor overlap left border******************************
@@ -193,7 +207,7 @@ void ABorderActor::OnLeftRightBorderBeginOverlap(UPrimitiveComponent* Overlapped
                 UE_LOG(LogTemp, Display, TEXT("You are Wrong!"));
             }
         }
-        
+        OverlappedActor->SetLifeSpan(2.f);//Change
         return;
     }
 
@@ -206,7 +220,7 @@ void ABorderActor::OnBottomBorderBeginOverlap(UPrimitiveComponent* OverlappedCom
     auto OverlappedActor = Cast<AEdibleSpriteActor>(OtherActor);
     if (!OverlappedActor) return;
     UE_LOG(LogTemp, Display, TEXT("You loooose!"));
-    OverlappedActor->SetLifeSpan(1.0f);
+    OverlappedActor->SetLifeSpan(1.0f);//Change
 }
 
 

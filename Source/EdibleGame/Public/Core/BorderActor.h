@@ -11,6 +11,7 @@ class UBoxComponent;
 class USceneComponent;
 class UPaperSprite;
 class AEdibleSpriteActor;
+class UPaperSpriteComponent;
 
 UCLASS()
 class EDIBLEGAME_API ABorderActor : public AActor
@@ -27,8 +28,8 @@ public:
 protected:
     virtual void BeginPlay() override;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
-    UPaperSprite* BackSprite;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    UPaperSpriteComponent* BackgroundSprite;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
     UBoxComponent* LeftBorder;
@@ -62,6 +63,7 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
     TSubclassOf<AEdibleSpriteActor> EdibleSpriteClass;
+    
 
 private:
     TArray<FSpawnActorInfo> ActorsToSpawn;
@@ -88,6 +90,7 @@ private:
     void OnLeftRightBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
         int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+    UFUNCTION()
     void OnBottomBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
         int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };
