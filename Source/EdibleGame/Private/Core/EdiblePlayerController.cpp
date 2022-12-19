@@ -6,8 +6,7 @@
 
 AEdiblePlayerController::AEdiblePlayerController()
 {
-    //bEnableTouchOverEvents = true;
-
+  
 }
 
 void AEdiblePlayerController::SetupInputComponent()
