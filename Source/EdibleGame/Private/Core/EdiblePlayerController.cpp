@@ -4,11 +4,9 @@
 #include "Core/EdiblePlayerController.h"
 #include "Core/EdibleSpriteActor.h"
 
-
-
 AEdiblePlayerController::AEdiblePlayerController()
 {
-    bEnableTouchOverEvents = true;
+    //bEnableTouchOverEvents = true;
 
 }
 
@@ -18,20 +16,15 @@ void AEdiblePlayerController::SetupInputComponent()
 
     InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &AEdiblePlayerController::StartCarry);
     InputComponent->BindTouch(EInputEvent::IE_Released, this, &AEdiblePlayerController::StopCarry);
-    
-    
+        
 }
 
 void AEdiblePlayerController::StartCarry(ETouchIndex::Type FingerIndex, FVector Location)
 {
-    UE_LOG(LogTemp, Warning, TEXT("*****************************Touch*****************************"));
+    
     FHitResult HitResult;
-    if (!(GetHitResultUnderFingerByChannel(FingerIndex, ETraceTypeQuery::TraceTypeQuery1, false, HitResult)))
-    {
-        UE_LOG(LogTemp, Display, TEXT("*****************************Hit Nothing*****************************"));
-        return;
-    }
-
+    if (!(GetHitResultUnderFingerByChannel(FingerIndex, ETraceTypeQuery::TraceTypeQuery1, false, HitResult))) return;
+   
     const auto HitActor = HitResult.GetActor();
     if (!HitActor) return;
     const auto EatableActor = Cast<AEdibleSpriteActor>(HitActor);
@@ -40,10 +33,9 @@ void AEdiblePlayerController::StartCarry(ETouchIndex::Type FingerIndex, FVector 
 
     if(HitComp->IsSimulatingPhysics())
     {
-        static FName Name = NAME_None;
-        EatableActor->StartToGrabActor(HitComp, HitResult.Location, FingerIndex, true);       
-        GrabbedActors.Add(FingerIndex, EatableActor);
         
+        EatableActor->StartToGrabActor(HitComp, HitResult.Location, FingerIndex);       
+        GrabbedActors.Add(FingerIndex, EatableActor);       
     }
     
     

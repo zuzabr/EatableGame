@@ -9,6 +9,7 @@
 
 class UPaperSprite;
 class UPhysicsHandleComponent;
+class AEdiblePlayerController;
 
 UCLASS()
 class EDIBLEGAME_API AEdibleSpriteActor : public APaperSpriteActor
@@ -24,16 +25,18 @@ public:
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "EdibleSpriteActor")
     UPaperSprite* GetEatableActorSprite() const;
 
-    void StartToGrabActor(UPrimitiveComponent* Comp, FVector Location, ETouchIndex::Type FingerIndex, bool Grab = true);
-    void StopGrabActor(bool Grab = false);
+    void StartToGrabActor(UPrimitiveComponent* Comp, FVector Location, ETouchIndex::Type FingerIndex);
+    void StopGrabActor();
     void UpdateActorLocation();
 
+    
+
 protected:
-    virtual void Tick(float DeltaTime) override;
+    virtual void BeginPlay() override;
 
     const FSpawnActorInfo* SpawnActorInfo = nullptr;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Components")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
     UPhysicsHandleComponent* PhysicsHandle;
 
     UPROPERTY(EditDefaultsOnly, Category = "EdibleSpriteActor")
@@ -42,5 +45,5 @@ protected:
 private:
     FTimerHandle CarryTimerHandle;
     ETouchIndex::Type Finger;
-    bool bCarried = false;
+    AEdiblePlayerController* Controller;
 };

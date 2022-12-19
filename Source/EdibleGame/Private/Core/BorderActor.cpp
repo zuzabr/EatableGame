@@ -176,7 +176,7 @@ void ABorderActor::OnLeftRightBorderBeginOverlap(UPrimitiveComponent* Overlapped
                 UE_LOG(LogTemp, Display, TEXT("You are Right!"));
             }
         }
-        OverlappedActor->SetLifeSpan(2.f);//Change
+        OverlappedActor->SetLifeSpan(0.5f);//Change
         return;
     }
 //*****************************Actor overlap left border******************************
@@ -207,7 +207,7 @@ void ABorderActor::OnLeftRightBorderBeginOverlap(UPrimitiveComponent* Overlapped
                 UE_LOG(LogTemp, Display, TEXT("You are Wrong!"));
             }
         }
-        OverlappedActor->SetLifeSpan(2.f);//Change
+        OverlappedActor->SetLifeSpan(0.5f);//Change
         return;
     }
 
@@ -220,7 +220,7 @@ void ABorderActor::OnBottomBorderBeginOverlap(UPrimitiveComponent* OverlappedCom
     auto OverlappedActor = Cast<AEdibleSpriteActor>(OtherActor);
     if (!OverlappedActor) return;
     UE_LOG(LogTemp, Display, TEXT("You loooose!"));
-    OverlappedActor->SetLifeSpan(1.0f);//Change
+    OverlappedActor->SetLifeSpan(0.5f);//Change
 }
 
 

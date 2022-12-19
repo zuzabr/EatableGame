@@ -6,60 +6,44 @@
 
 AEdibleSpriteActor::AEdibleSpriteActor()
 {
+    PrimaryActorTick.bCanEverTick = false;
     PhysicsHandle = CreateDefaultSubobject<UPhysicsHandleComponent>("PhysicsHandle");
 }
 
-void AEdibleSpriteActor::Tick(float DeltaTime)
+void AEdibleSpriteActor::BeginPlay()
 {
-    Super::Tick(DeltaTime);
-    if (bCarried)
-    {
-        UpdateActorLocation();
-    }
+    Super::BeginPlay();
+    Controller = Cast<AEdiblePlayerController>(GetWorld()->GetFirstPlayerController());
 }
 
-bool AEdibleSpriteActor::GetIsEatable() const
+void AEdibleSpriteActor::StartToGrabActor(UPrimitiveComponent* Comp, FVector Location, ETouchIndex::Type FingerIndex)
 {
-    return SpawnActorInfo != nullptr ? SpawnActorInfo->bEatable : false;
-}
-
-void AEdibleSpriteActor::StartToGrabActor(UPrimitiveComponent* Comp, FVector Location, ETouchIndex::Type FingerIndex, bool Grab)
-{
-    bCarried = Grab;
+    
     Finger = FingerIndex;
-    FName Name = NAME_None;
-    PhysicsHandle->GrabComponentAtLocation(Comp, Name, (Cast<USceneComponent>(Comp))->GetComponentLocation());
+    PhysicsHandle->GrabComponentAtLocation(Comp, NAME_None, Location);
+
+    GetWorldTimerManager().SetTimer(CarryTimerHandle, this, &AEdibleSpriteActor::UpdateActorLocation, 0.01f, true);
 }
 
-void AEdibleSpriteActor::StopGrabActor(bool Grab)
+void AEdibleSpriteActor::StopGrabActor()
 {
-    bCarried = Grab;
     PhysicsHandle->ReleaseComponent();
+    GetWorldTimerManager().ClearTimer(CarryTimerHandle);
 }
 
-// Need To Set Location Correctly
 void AEdibleSpriteActor::UpdateActorLocation()
 {
-    const auto Controller = Cast<AEdiblePlayerController>(GetWorld()->GetFirstPlayerController());
-    if (!Controller) return;
-    
-    float XLoc;
-    float YLoc;
+    Controller = Controller != nullptr ? Controller : Cast<AEdiblePlayerController>(GetWorld()->GetFirstPlayerController());
 
-    Controller->GetInputTouchState(Finger, XLoc, YLoc, bCarried);
-    if (bCarried)
-    {
-        FVector Loc;
-        Loc.X = XLoc;
-        Loc.Z = YLoc;
-        Loc.Y = GetActorLocation().Y;
-        PhysicsHandle->SetTargetLocation(Loc);
-    }
-    else
-    {
-        StopGrabActor();
-    }
-    
+    if (!Controller) return;
+
+    FVector Location;
+
+    FHitResult HitResult;
+    if (!(Controller->GetHitResultUnderFingerByChannel(Finger, ETraceTypeQuery::TraceTypeQuery1, false, HitResult))) return;
+    Location = HitResult.Location;
+    Location.Y = (Cast<USceneComponent>(PhysicsHandle->GrabbedComponent)->GetComponentLocation()).Y;
+    PhysicsHandle->SetTargetLocation(Location);
 }
 
 UPaperSprite* AEdibleSpriteActor::GetEatableActorSprite() const
@@ -72,4 +56,9 @@ UPaperSprite* AEdibleSpriteActor::GetEatableActorSprite() const
     {
         return ItemSptite;
     }
+}
+
+bool AEdibleSpriteActor::GetIsEatable() const
+{
+    return SpawnActorInfo != nullptr ? SpawnActorInfo->bEatable : false;
 }
