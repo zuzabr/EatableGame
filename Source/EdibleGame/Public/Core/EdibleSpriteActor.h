@@ -29,7 +29,7 @@ public:
     void StopGrabActor();
     void UpdateActorLocation();
 
-    
+    void IntendToDestroy();
 
 protected:
     virtual void BeginPlay() override;
@@ -46,4 +46,5 @@ private:
     FTimerHandle CarryTimerHandle;
     ETouchIndex::Type Finger;
     AEdiblePlayerController* Controller;
+    bool bCarried = false;
 };

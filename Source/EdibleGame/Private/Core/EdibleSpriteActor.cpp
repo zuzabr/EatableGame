@@ -18,7 +18,7 @@ void AEdibleSpriteActor::BeginPlay()
 
 void AEdibleSpriteActor::StartToGrabActor(UPrimitiveComponent* Comp, FVector Location, ETouchIndex::Type FingerIndex)
 {
-    
+    bCarried = true;
     Finger = FingerIndex;
     PhysicsHandle->GrabComponentAtLocation(Comp, NAME_None, Location);
 
@@ -27,6 +27,7 @@ void AEdibleSpriteActor::StartToGrabActor(UPrimitiveComponent* Comp, FVector Loc
 
 void AEdibleSpriteActor::StopGrabActor()
 {
+    bCarried = false;
     PhysicsHandle->ReleaseComponent();
     GetWorldTimerManager().ClearTimer(CarryTimerHandle);
 }
@@ -44,6 +45,11 @@ void AEdibleSpriteActor::UpdateActorLocation()
     Location = HitResult.Location;
     Location.Y = (Cast<USceneComponent>(PhysicsHandle->GrabbedComponent)->GetComponentLocation()).Y;
     PhysicsHandle->SetTargetLocation(Location);
+}
+
+void AEdibleSpriteActor::IntendToDestroy()
+{
+    SetLifeSpan(0.5f);
 }
 
 UPaperSprite* AEdibleSpriteActor::GetEatableActorSprite() const

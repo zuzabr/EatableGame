@@ -12,6 +12,8 @@ class USceneComponent;
 class UPaperSprite;
 class AEdibleSpriteActor;
 class UPaperSpriteComponent;
+class UCameraComponent;
+class USpringArmComponent;
 
 UCLASS()
 class EDIBLEGAME_API ABorderActor : public AActor
@@ -24,6 +26,8 @@ public:
     void StartSpawnObjects();
     void StopSpawnObjects();
     
+    UFUNCTION(BlueprintCallable, Category = "BorderActor")
+    FVector2D GetBackgroundSize() const;
 
 protected:
     virtual void BeginPlay() override;
@@ -63,6 +67,12 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
     TSubclassOf<AEdibleSpriteActor> EdibleSpriteClass;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    UCameraComponent* CameraComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    USpringArmComponent* SpringArmComponent;
     
 
 private:

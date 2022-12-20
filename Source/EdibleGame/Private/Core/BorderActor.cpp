@@ -7,6 +7,8 @@
 #include "PaperSpriteComponent.h"
 #include "Core/EdibleSpriteActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 
 ABorderActor::ABorderActor()
@@ -61,6 +63,11 @@ ABorderActor::ABorderActor()
     SpawnPoints.Add(SpawnPoint4);
     SpawnPoints.Add(SpawnPoint5);
 
+    SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
+    SpringArmComponent->SetupAttachment(GetRootComponent());
+    
+    CameraComponent = CreateDefaultSubobject<UCameraComponent>("Camera");
+    CameraComponent->SetupAttachment(SpringArmComponent);
    
     
 }
@@ -76,6 +83,8 @@ void ABorderActor::BeginPlay()
     //*************************************************Initial Settings**********************************
     ApplyGameSettings(CurrentGameTheme, true);
     SetFallingActorsToSpawn(CurrentGameTheme);
+    const auto SpriteSize = GetBackgroundSize();
+    CameraComponent->SetAspectRatio(SpriteSize.X / SpriteSize.Y);
 
     StartSpawnObjects();
 }
@@ -122,6 +131,11 @@ void ABorderActor::StartSpawnObjects()
 void ABorderActor::StopSpawnObjects()
 {
     GetWorldTimerManager().ClearTimer(SpawnObjectsTimerHandle);
+}
+
+FVector2D ABorderActor::GetBackgroundSize() const
+{
+    return BackgroundSprite->GetSprite()->GetSourceSize();
 }
 
 void ABorderActor::SpawnObjects()
@@ -176,7 +190,7 @@ void ABorderActor::OnLeftRightBorderBeginOverlap(UPrimitiveComponent* Overlapped
                 UE_LOG(LogTemp, Display, TEXT("You are Right!"));
             }
         }
-        OverlappedActor->SetLifeSpan(0.5f);//Change
+        OverlappedActor->IntendToDestroy();
         return;
     }
 //*****************************Actor overlap left border******************************
@@ -207,7 +221,7 @@ void ABorderActor::OnLeftRightBorderBeginOverlap(UPrimitiveComponent* Overlapped
                 UE_LOG(LogTemp, Display, TEXT("You are Wrong!"));
             }
         }
-        OverlappedActor->SetLifeSpan(0.5f);//Change
+        OverlappedActor->IntendToDestroy();
         return;
     }
 
@@ -220,7 +234,7 @@ void ABorderActor::OnBottomBorderBeginOverlap(UPrimitiveComponent* OverlappedCom
     auto OverlappedActor = Cast<AEdibleSpriteActor>(OtherActor);
     if (!OverlappedActor) return;
     UE_LOG(LogTemp, Display, TEXT("You loooose!"));
-    OverlappedActor->SetLifeSpan(0.5f);//Change
+    OverlappedActor->IntendToDestroy();
 }
 
 

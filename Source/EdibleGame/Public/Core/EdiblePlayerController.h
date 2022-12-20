@@ -19,7 +19,7 @@ public:
 
 protected:
     virtual void SetupInputComponent() override;
-
+    virtual void BeginPlay() override;
 
     UFUNCTION()
     void StartCarry(ETouchIndex::Type FingerIndex, FVector Location);

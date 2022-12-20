@@ -3,10 +3,25 @@
 
 #include "Core/EdiblePlayerController.h"
 #include "Core/EdibleSpriteActor.h"
+#include "Kismet/GameplayStatics.h"
+#include "Core/BorderActor.h"
 
 AEdiblePlayerController::AEdiblePlayerController()
+{        
+    SetShowMouseCursor(true);
+}
+
+void AEdiblePlayerController::BeginPlay()
 {
-  
+    Super::BeginPlay();
+
+    const auto Border = Cast<ABorderActor>(UGameplayStatics::GetActorOfClass(this, ABorderActor::StaticClass()));
+    if (!Border)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("BorderIsNotFound"));
+        return;
+    }
+    SetViewTarget(Border);
 }
 
 void AEdiblePlayerController::SetupInputComponent()
