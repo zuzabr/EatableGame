@@ -7,6 +7,7 @@
 #include "GameProgressWidget.generated.h"
 
 class UButton;
+class ABorderActor;
 
 UCLASS()
 class EDIBLEGAME_API UGameProgressWidget : public UUserWidget
@@ -19,7 +20,12 @@ protected:
     UPROPERTY(meta = (BindWidget))
     UButton* PauseButton;
 
+    UPROPERTY(BlueprintReadOnly, Category = "Default")
+    ABorderActor* Border;
+
 private:
     UFUNCTION()
     void OnPauseSet();
+
+    
 };

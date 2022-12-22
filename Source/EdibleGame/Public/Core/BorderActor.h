@@ -33,6 +33,21 @@ public:
     UFUNCTION(BlueprintCallable, Category = "BorderActor")
     FVector2D GetBackgroundSize() const;
 
+    UFUNCTION(BlueprintCallable, Category = "BorderActor")
+    inline int32 GetWrongEatableItems() const { return WrongEatableItems; }
+    UFUNCTION(BlueprintCallable, Category = "BorderActor")
+    inline int32 GetRightEatableItems() const { return RightEatableItems; }
+    UFUNCTION(BlueprintCallable, Category = "BorderActor")
+    inline int32 GetWrongNonEatableItems() const { return WrongNonEatableItems; }
+    UFUNCTION(BlueprintCallable, Category = "BorderActor")
+    inline int32 GetRightNonEatableItems() const { return RightNonEatableItems; }
+    UFUNCTION(BlueprintCallable, Category = "BorderActor")
+    inline int32 GetMissedItems() const { return MissedItems; }
+    UFUNCTION(BlueprintCallable, Category = "BorderActor")
+    inline int32 GetExp() const { return Exp; }
+    UFUNCTION(BlueprintCallable, Category = "BorderActor")
+    inline int32 GetCoins() const { return Coins; };
+
 protected:
     virtual void BeginPlay() override;
 
@@ -92,7 +107,7 @@ private:
     UDataTable* SpawnActorDT;
 
     UPROPERTY(EditDefaultsOnly, Category = "Settings")
-    float SpawnRate{1.2f};
+    float SpawnRate{1.0f};
 
     FTimerHandle SpawnObjectsTimerHandle;
 
@@ -100,11 +115,26 @@ private:
     void SpawnObjects();
 
     UFUNCTION()
-    void OnLeftRightBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+    void OnLeftBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+        int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+    UFUNCTION()
+    void OnRightBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
         int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
     UFUNCTION()
     void OnBottomBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
         int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+    int32 WrongEatableItems{0};
+    int32 RightEatableItems{0};
+
+    int32 WrongNonEatableItems{0};
+    int32 RightNonEatableItems{0};
+
+    int32 MissedItems{0};
+
+    int32 Exp{0};
+    int32 Coins{0};
 
 };

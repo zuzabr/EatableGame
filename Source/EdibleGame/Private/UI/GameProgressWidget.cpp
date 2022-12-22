@@ -4,6 +4,8 @@
 #include "UI/GameProgressWidget.h"
 #include "Components/Button.h"
 #include "Core/EdibleGM.h"
+#include "Core/BorderActor.h"
+#include "Kismet/GameplayStatics.h"
 
 void UGameProgressWidget::NativeOnInitialized()
 {
@@ -13,6 +15,9 @@ void UGameProgressWidget::NativeOnInitialized()
     {
         PauseButton->OnPressed.AddDynamic(this, &UGameProgressWidget::OnPauseSet);
     }
+
+    Border = Cast<ABorderActor>(UGameplayStatics::GetActorOfClass(this, ABorderActor::StaticClass()));
+    
 }
 
 void UGameProgressWidget::OnPauseSet()

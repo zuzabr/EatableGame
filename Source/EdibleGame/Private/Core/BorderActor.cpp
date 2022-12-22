@@ -75,8 +75,8 @@ void ABorderActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    LeftBorder->OnComponentBeginOverlap.AddDynamic(this, &ABorderActor::OnLeftRightBorderBeginOverlap);
-    RightBorder->OnComponentBeginOverlap.AddDynamic(this, &ABorderActor::OnLeftRightBorderBeginOverlap);
+    LeftBorder->OnComponentBeginOverlap.AddDynamic(this, &ABorderActor::OnLeftBorderBeginOverlap);
+    RightBorder->OnComponentBeginOverlap.AddDynamic(this, &ABorderActor::OnRightBorderBeginOverlap);
     BottomBorder->OnComponentBeginOverlap.AddDynamic(this, &ABorderActor::OnBottomBorderBeginOverlap);
 
     const auto SpriteSize = GetBackgroundSize();
@@ -160,81 +160,77 @@ void ABorderActor::SpawnObjects()
         GetWorld()->SpawnActorDeferred<AEdibleSpriteActor>(EdibleSpriteClass, SpawnPoints[RandomPoint]->GetComponentTransform());
     if (Actor)
     {
-        
-        UE_LOG(LogTemp, Display, TEXT("Start Spawn Objects"));
+
+        ++Exp;
         Actor->SetActorInfo(&(ActorsToSpawn[RandomIndex]));
         UGameplayStatics::FinishSpawningActor(Actor, SpawnPoints[RandomPoint]->GetComponentTransform());
     }
 }
 
-void ABorderActor::OnLeftRightBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ABorderActor::OnLeftBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
     const auto OverlappedActor = Cast<AEdibleSpriteActor>(OtherActor);
     if (!OverlappedActor) return;
 
-    //*****************************Actor overlap left border******************************
-    if (LeftBorder->IsOverlappingActor(OverlappedActor))
+    const auto bEatable = OverlappedActor->GetIsEatable();
+    if (EatableOnLeft)
     {
-        const auto ActorIsEatable = OverlappedActor->GetIsEatable();
-        if (EatableOnLeft)
+        if (bEatable)
         {
-            if (ActorIsEatable)
-            {
-                UE_LOG(LogTemp, Display, TEXT("You are Right!"));
-            }
-            else
-            {
-                UE_LOG(LogTemp, Display, TEXT("You are Wrong!"));
-            }
+            ++RightEatableItems;
         }
         else
         {
-            if (ActorIsEatable)
-            {
-                UE_LOG(LogTemp, Display, TEXT("You are Wrong!"));
-            }
-            else
-            {
-                UE_LOG(LogTemp, Display, TEXT("You are Right!"));
-            }
+            ++WrongEatableItems;
         }
-        OverlappedActor->IntendToDestroy();
-        return;
     }
-    //*****************************Actor overlap left border******************************
-
-    //*****************************Actor overlap right border******************************
-    if (RightBorder->IsOverlappingActor(OverlappedActor))
+    else
     {
-        const auto ActorIsEatable = OverlappedActor->GetIsEatable();
-        if (EatableOnLeft)
+        if (bEatable)
         {
-            if (ActorIsEatable)
-            {
-                UE_LOG(LogTemp, Display, TEXT("You are Wrong!"));
-            }
-            else
-            {
-                UE_LOG(LogTemp, Display, TEXT("You are Right!"));
-            }
+            ++WrongEatableItems;
         }
         else
         {
-            if (ActorIsEatable)
-            {
-                UE_LOG(LogTemp, Display, TEXT("You are Right!"));
-            }
-            else
-            {
-                UE_LOG(LogTemp, Display, TEXT("You are Wrong!"));
-            }
+            ++RightEatableItems;
         }
-        OverlappedActor->IntendToDestroy();
-        return;
     }
+    OverlappedActor->IntendToDestroy();
+    return;
+}
 
-    //*****************************Actor overlap right border******************************
+void ABorderActor::OnRightBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+    const auto OverlappedActor = Cast<AEdibleSpriteActor>(OtherActor);
+    if (!OverlappedActor) return;
+
+    const auto bEatable = OverlappedActor->GetIsEatable();
+    if (EatableOnLeft)
+    {
+        if (bEatable)
+        {
+            ++WrongNonEatableItems;
+        }
+        else
+        {
+            ++RightNonEatableItems;
+        }
+    }
+    else
+    {
+        if (bEatable)
+        {
+            ++RightNonEatableItems;
+        }
+        else
+        {
+            ++WrongNonEatableItems;
+        }
+    }
+    OverlappedActor->IntendToDestroy();
+    return;
 }
 
 void ABorderActor::OnBottomBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -242,6 +238,6 @@ void ABorderActor::OnBottomBorderBeginOverlap(UPrimitiveComponent* OverlappedCom
 {
     auto OverlappedActor = Cast<AEdibleSpriteActor>(OtherActor);
     if (!OverlappedActor) return;
-    UE_LOG(LogTemp, Display, TEXT("You loooose!"));
+    ++MissedItems;
     OverlappedActor->IntendToDestroy();
 }
