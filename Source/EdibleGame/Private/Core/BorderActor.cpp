@@ -9,7 +9,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-
+#include "Core/EdibleGM.h"
+#include "Engine/DataTable.h"
 
 ABorderActor::ABorderActor()
 {
@@ -17,7 +18,7 @@ ABorderActor::ABorderActor()
 
     Root = CreateDefaultSubobject<USceneComponent>("Root");
     SetRootComponent(Root);
- 
+
     BackgroundSprite = CreateDefaultSubobject<UPaperSpriteComponent>("BackgroundBorder");
     BackgroundSprite->SetupAttachment(Root);
 
@@ -55,7 +56,7 @@ ABorderActor::ABorderActor()
     SpawnPoint4->SetupAttachment(Root);
     SpawnPoint5 = CreateDefaultSubobject<USceneComponent>("SpawnPoint5");
     SpawnPoint5->SetupAttachment(Root);
-    
+
     SpawnPoints.Empty();
     SpawnPoints.Add(SpawnPoint1);
     SpawnPoints.Add(SpawnPoint2);
@@ -65,11 +66,9 @@ ABorderActor::ABorderActor()
 
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
     SpringArmComponent->SetupAttachment(GetRootComponent());
-    
+
     CameraComponent = CreateDefaultSubobject<UCameraComponent>("Camera");
     CameraComponent->SetupAttachment(SpringArmComponent);
-   
-    
 }
 
 void ABorderActor::BeginPlay()
@@ -80,18 +79,29 @@ void ABorderActor::BeginPlay()
     RightBorder->OnComponentBeginOverlap.AddDynamic(this, &ABorderActor::OnLeftRightBorderBeginOverlap);
     BottomBorder->OnComponentBeginOverlap.AddDynamic(this, &ABorderActor::OnBottomBorderBeginOverlap);
 
-    //*************************************************Initial Settings**********************************
-    ApplyGameSettings(CurrentGameTheme, true);
-    SetFallingActorsToSpawn(CurrentGameTheme);
     const auto SpriteSize = GetBackgroundSize();
     CameraComponent->SetAspectRatio(SpriteSize.X / SpriteSize.Y);
+    SetFallingActorsToSpawn(CurrentGameTheme);
 
+    if (GetWorld())
+    {
+        const auto GameMode = Cast<AEdibleGM>(GetWorld()->GetAuthGameMode());
+        if (GameMode)
+        {
+            GameMode->OnGameStarted.AddUObject(this, &ABorderActor::StartGameSession);
+        }
+    }
+}
+
+void ABorderActor::StartGameSession()
+{
+    ApplyGameSettings(CurrentGameTheme, true);
     StartSpawnObjects();
 }
 
 void ABorderActor::ApplyGameSettings(EGameTheme GameTheme, bool EatableIsOnTheLeft)
 {
-    if(CurrentGameTheme != GameTheme)
+    if (CurrentGameTheme != GameTheme)
     {
         CurrentGameTheme = GameTheme;
         SetFallingActorsToSpawn(GameTheme);
@@ -102,15 +112,13 @@ void ABorderActor::ApplyGameSettings(EGameTheme GameTheme, bool EatableIsOnTheLe
 void ABorderActor::SetFallingActorsToSpawn(EGameTheme Theme)
 {
 
-    if (SpawnActorDT.DataTable.IsNull()) return;
-    UE_LOG(LogTemp, Display, TEXT("Data Table is not null"));
-
+    if (SpawnActorDT == nullptr) return;
     ActorsToSpawn.Empty();
     static const FString DT_String = FString("Default");
 
-    for (const auto& RowName : SpawnActorDT.DataTable->GetRowNames())
+    for (const auto& RowName : SpawnActorDT->GetRowNames())
     {
-        const auto ActorInfo = SpawnActorDT.DataTable->FindRow<FSpawnActorInfo>(RowName, DT_String, true);
+        const auto ActorInfo = SpawnActorDT->FindRow<FSpawnActorInfo>(RowName, DT_String, true);
 
         if (!ActorInfo) continue;
 
@@ -119,12 +127,11 @@ void ABorderActor::SetFallingActorsToSpawn(EGameTheme Theme)
             ActorsToSpawn.Add(*ActorInfo);
         }
     }
-
-
 }
 
 void ABorderActor::StartSpawnObjects()
 {
+    if (GetWorldTimerManager().IsTimerActive(SpawnObjectsTimerHandle)) return;
     GetWorldTimerManager().SetTimer(SpawnObjectsTimerHandle, this, &ABorderActor::SpawnObjects, SpawnRate, true);
 }
 
@@ -140,32 +147,34 @@ FVector2D ABorderActor::GetBackgroundSize() const
 
 void ABorderActor::SpawnObjects()
 {
+
     int32 RandomIndex = FMath::RandRange(0, ActorsToSpawn.Num() - 1);
     if (!ActorsToSpawn.IsValidIndex(RandomIndex)) return;
-    
+
     int32 RandomPoint = FMath::RandRange(0, SpawnPoints.Num() - 1);
     if (!SpawnPoints.IsValidIndex(RandomPoint)) return;
 
     if (!GetWorld()) return;
-   
-    const auto Actor = GetWorld()->SpawnActorDeferred<AEdibleSpriteActor>(EdibleSpriteClass, SpawnPoints[RandomPoint]->GetComponentTransform());
+
+    const auto Actor =
+        GetWorld()->SpawnActorDeferred<AEdibleSpriteActor>(EdibleSpriteClass, SpawnPoints[RandomPoint]->GetComponentTransform());
     if (Actor)
     {
+        
+        UE_LOG(LogTemp, Display, TEXT("Start Spawn Objects"));
         Actor->SetActorInfo(&(ActorsToSpawn[RandomIndex]));
         UGameplayStatics::FinishSpawningActor(Actor, SpawnPoints[RandomPoint]->GetComponentTransform());
     }
-    
-
 }
 
-void ABorderActor::OnLeftRightBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-    int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ABorderActor::OnLeftRightBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
     const auto OverlappedActor = Cast<AEdibleSpriteActor>(OtherActor);
     if (!OverlappedActor) return;
-    
+
     //*****************************Actor overlap left border******************************
-    if(LeftBorder->IsOverlappingActor(OverlappedActor))
+    if (LeftBorder->IsOverlappingActor(OverlappedActor))
     {
         const auto ActorIsEatable = OverlappedActor->GetIsEatable();
         if (EatableOnLeft)
@@ -193,9 +202,9 @@ void ABorderActor::OnLeftRightBorderBeginOverlap(UPrimitiveComponent* Overlapped
         OverlappedActor->IntendToDestroy();
         return;
     }
-//*****************************Actor overlap left border******************************
+    //*****************************Actor overlap left border******************************
 
-//*****************************Actor overlap right border******************************
+    //*****************************Actor overlap right border******************************
     if (RightBorder->IsOverlappingActor(OverlappedActor))
     {
         const auto ActorIsEatable = OverlappedActor->GetIsEatable();
@@ -225,7 +234,7 @@ void ABorderActor::OnLeftRightBorderBeginOverlap(UPrimitiveComponent* Overlapped
         return;
     }
 
-//*****************************Actor overlap right border******************************
+    //*****************************Actor overlap right border******************************
 }
 
 void ABorderActor::OnBottomBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -236,6 +245,3 @@ void ABorderActor::OnBottomBorderBeginOverlap(UPrimitiveComponent* OverlappedCom
     UE_LOG(LogTemp, Display, TEXT("You loooose!"));
     OverlappedActor->IntendToDestroy();
 }
-
-
-

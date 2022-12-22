@@ -18,6 +18,7 @@ enum class EMatchState : uint8
 };
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMatchStateChangedSignature, EMatchState);
+DECLARE_MULTICAST_DELEGATE(FOnGameStarted);
 
 UENUM(BlueprintType)
 enum class EGameTheme : uint8

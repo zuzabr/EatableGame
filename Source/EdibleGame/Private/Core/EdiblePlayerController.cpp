@@ -7,7 +7,7 @@
 #include "Core/BorderActor.h"
 
 AEdiblePlayerController::AEdiblePlayerController()
-{        
+{
     SetShowMouseCursor(true);
 }
 
@@ -51,8 +51,7 @@ void AEdiblePlayerController::StartCarry(ETouchIndex::Type FingerIndex, FVector 
         EatableActor->StartToGrabActor(HitComp, HitResult.Location, FingerIndex);       
         GrabbedActors.Add(FingerIndex, EatableActor);       
     }
-    
-    
+        
 }
 
 void AEdiblePlayerController::StopCarry(ETouchIndex::Type FingerIndex, FVector Location)

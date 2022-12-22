@@ -1,19 +1,16 @@
 // Zuzabr Games 2022 All Rights Reserved
 
 
-#include "Core/EdibleHUD.h"
-#include "Engine/Canvas.h"
+#include "Menu/MenuHUD.h"
 #include "Blueprint/UserWidget.h"
-#include "Core/EdibleGM.h"
+#include "Menu/MenuGameMode.h"
 
-void AEdibleHUD::BeginPlay()
+void AMenuHUD::BeginPlay()
 {
     Super::BeginPlay();
 
-    GameWidgets.Add(EMatchState::InProgress, CreateWidget<UUserWidget>(GetWorld(), GameProgressWidgetClass));
-    GameWidgets.Add(EMatchState::Lose, CreateWidget<UUserWidget>(GetWorld(), LoseWidgetClass));   
-    GameWidgets.Add(EMatchState::Pause, CreateWidget<UUserWidget>(GetWorld(), PauseWidgetClass));
-    
+    GameWidgets.Add(EMatchState::WaitingToStart, CreateWidget<UUserWidget>(GetWorld(), MainMenuWidgetClass));
+    GameWidgets.Add(EMatchState::Settings, CreateWidget<UUserWidget>(GetWorld(), SettingsWidgetClass));
 
     for (auto GameWidgetPair : GameWidgets)
     {
@@ -26,15 +23,15 @@ void AEdibleHUD::BeginPlay()
 
     if (GetWorld())
     {
-        const auto GameMode = Cast<AEdibleGM>(GetWorld()->GetAuthGameMode());
+        const auto GameMode = Cast<AMenuGameMode>(GetWorld()->GetAuthGameMode());
         if (GameMode)
         {
-            GameMode->OnMatchStateChanged.AddUObject(this, &AEdibleHUD::OnMatchStateChanged);
+            GameMode->OnMatchStateChanged.AddUObject(this, &AMenuHUD::OnMatchStateChanged);
         }
     }
 }
 
-void AEdibleHUD::OnMatchStateChanged(EMatchState State)
+void AMenuHUD::OnMatchStateChanged(EMatchState State)
 {
     if (CurrentWidget)
     {

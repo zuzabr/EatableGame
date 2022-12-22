@@ -16,16 +16,18 @@ public:
     AEdibleGM();
 
     FOnMatchStateChangedSignature OnMatchStateChanged;
+    FOnGameStarted OnGameStarted;
 
     virtual void StartPlay() override;
     virtual bool SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate = FCanUnpause()) override;
     virtual bool ClearPause() override;
-    void OpenMainMenu();
-    void OpenSettingsMenu();
+
     void StartGame();
     void GameLost();
 
+   
 private:
     EMatchState MatchState = EMatchState::None;
     void SetMatchState(EMatchState State);
+
 };

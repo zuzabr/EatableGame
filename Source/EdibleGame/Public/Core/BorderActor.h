@@ -14,6 +14,7 @@ class AEdibleSpriteActor;
 class UPaperSpriteComponent;
 class UCameraComponent;
 class USpringArmComponent;
+class UDataTable;
 
 UCLASS()
 class EDIBLEGAME_API ABorderActor : public AActor
@@ -25,7 +26,10 @@ public:
     void ApplyGameSettings(EGameTheme GameTheme, bool EatableIsOnTheLeft);
     void StartSpawnObjects();
     void StopSpawnObjects();
-    
+   
+    UFUNCTION()
+    void StartGameSession();
+
     UFUNCTION(BlueprintCallable, Category = "BorderActor")
     FVector2D GetBackgroundSize() const;
 
@@ -73,7 +77,6 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USpringArmComponent* SpringArmComponent;
-    
 
 private:
     TArray<FSpawnActorInfo> ActorsToSpawn;
@@ -86,10 +89,10 @@ private:
     bool EatableOnLeft = true;
 
     UPROPERTY(EditDefaultsOnly, Category = "Settings")
-    FDataTableRowHandle SpawnActorDT;
+    UDataTable* SpawnActorDT;
 
     UPROPERTY(EditDefaultsOnly, Category = "Settings")
-    float SpawnRate{1.5f};
+    float SpawnRate{1.2f};
 
     FTimerHandle SpawnObjectsTimerHandle;
 
@@ -103,4 +106,5 @@ private:
     UFUNCTION()
     void OnBottomBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
         int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 };

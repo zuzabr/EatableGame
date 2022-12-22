@@ -4,17 +4,20 @@
 #include "Core/EdibleGM.h"
 #include "Core/EdibleHUD.h"
 #include "Core/EdiblePlayerController.h"
+#include "Kismet/GameplayStatics.h"
+#include "Core/BorderActor.h"
 
 AEdibleGM::AEdibleGM()
 {
     HUDClass = AEdibleHUD::StaticClass();
     PlayerControllerClass = AEdiblePlayerController::StaticClass();
+    
 }
 
 void AEdibleGM::StartPlay()
 {
     Super::StartPlay();
-    OpenMainMenu();
+    StartGame();
 }
 
 bool AEdibleGM::SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate)
@@ -38,22 +41,13 @@ bool AEdibleGM::ClearPause()
     return PauseCleared;
 }
 
-void AEdibleGM::OpenMainMenu()
-{
-    SetMatchState(EMatchState::WaitingToStart);
-}
-
-void AEdibleGM::OpenSettingsMenu()
-{
-    SetMatchState(EMatchState::Settings);
-}
-
 void AEdibleGM::StartGame()
 {
     if (IsPaused())
     {
         ClearPause();
     }
+    OnGameStarted.Broadcast();
     SetMatchState(EMatchState::InProgress);
 }
 
@@ -61,6 +55,8 @@ void AEdibleGM::GameLost()
 {
     SetMatchState(EMatchState::Lose);
 }
+
+
 
 
 void AEdibleGM::SetMatchState(EMatchState State)

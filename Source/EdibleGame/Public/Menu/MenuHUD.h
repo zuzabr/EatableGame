@@ -5,24 +5,21 @@
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
 #include "EdibleCoreTypes.h"
-#include "EdibleHUD.generated.h"
+#include "MenuHUD.generated.h"
 
 UCLASS()
-class EDIBLEGAME_API AEdibleHUD : public AHUD
+class EDIBLEGAME_API AMenuHUD : public AHUD
 {
     GENERATED_BODY()
 
 protected:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-    TSubclassOf<UUserWidget> GameProgressWidgetClass;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-    TSubclassOf<UUserWidget> PauseWidgetClass;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
-    TSubclassOf<UUserWidget> LoseWidgetClass;
-
     virtual void BeginPlay() override;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> MainMenuWidgetClass;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> SettingsWidgetClass;
 
 private:
     UPROPERTY()
