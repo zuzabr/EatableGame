@@ -14,5 +14,9 @@
 				"UMG"
 			]
 		}
+	],
+	"TargetPlatforms": [
+		"Android",
+		"Windows"
 	]
 }

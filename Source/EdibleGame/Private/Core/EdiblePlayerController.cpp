@@ -5,6 +5,7 @@
 #include "Core/EdibleSpriteActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Core/BorderActor.h"
+#include "Core/SpawnableSpriteActor.h"
 
 AEdiblePlayerController::AEdiblePlayerController()
 {
@@ -38,18 +39,22 @@ void AEdiblePlayerController::StartCarry(ETouchIndex::Type FingerIndex, FVector 
     
     FHitResult HitResult;
     if (!(GetHitResultUnderFingerByChannel(FingerIndex, ETraceTypeQuery::TraceTypeQuery1, false, HitResult))) return;
-   
-    const auto HitActor = HitResult.GetActor();
-    if (!HitActor) return;
-    const auto EatableActor = Cast<AEdibleSpriteActor>(HitActor);
+ 
     const auto HitComp = HitResult.GetComponent();
-    if (!EatableActor || !HitComp) return;
+    if (!HitComp) return;
 
     if(HitComp->IsSimulatingPhysics())
     {
-        
+        const auto EatableActor = Cast<AEdibleSpriteActor>(HitResult.GetActor());
+        if (!EatableActor) return;
         EatableActor->StartToGrabActor(HitComp, HitResult.Location, FingerIndex);       
         GrabbedActors.Add(FingerIndex, EatableActor);       
+    }
+    else
+    {
+        const auto SpawnableActor = Cast<ASpawnableSpriteActor>(HitResult.GetActor());
+        if (!SpawnableActor) return;
+        SpawnableActor->StartInteract();
     }
         
 }

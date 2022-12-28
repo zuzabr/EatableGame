@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "PaperSpriteActor.h"
+#include "Core/SpawnableSpriteActor.h"
 #include "EdibleCoreTypes.h"
 #include "EdibleSpriteActor.generated.h"
 
@@ -12,35 +13,30 @@ class UPhysicsHandleComponent;
 class AEdiblePlayerController;
 
 UCLASS()
-class EDIBLEGAME_API AEdibleSpriteActor : public APaperSpriteActor
+class EDIBLEGAME_API AEdibleSpriteActor : public ASpawnableSpriteActor
 {
     GENERATED_BODY()
 
 public:
     AEdibleSpriteActor();
 
-    bool GetIsEatable() const;
+    /*bool GetIsEatable() const;
     void SetActorInfo(const FSpawnActorInfo* SpawnInfo) { SpawnActorInfo = SpawnInfo; }
 
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "EdibleSpriteActor")
-    UPaperSprite* GetEatableActorSprite() const;
+    UPaperSprite* GetEatableActorSprite() const;*/
 
     void StartToGrabActor(UPrimitiveComponent* Comp, FVector Location, ETouchIndex::Type FingerIndex);
     void StopGrabActor();
     void UpdateActorLocation();
 
-    void IntendToDestroy();
+    virtual void IntendToDestroy() override;
 
 protected:
     virtual void BeginPlay() override;
 
-    const FSpawnActorInfo* SpawnActorInfo = nullptr;
-
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
     UPhysicsHandleComponent* PhysicsHandle;
-
-    UPROPERTY(EditDefaultsOnly, Category = "EdibleSpriteActor")
-    UPaperSprite* ItemSptite;
 
 private:
     FTimerHandle CarryTimerHandle;

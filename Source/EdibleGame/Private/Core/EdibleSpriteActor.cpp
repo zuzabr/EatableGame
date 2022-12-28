@@ -52,19 +52,19 @@ void AEdibleSpriteActor::IntendToDestroy()
     SetLifeSpan(0.5f);
 }
 
-UPaperSprite* AEdibleSpriteActor::GetEatableActorSprite() const
-{
-    if (SpawnActorInfo != nullptr && SpawnActorInfo->ItemSptite != nullptr)
-    {
-        return SpawnActorInfo->ItemSptite;
-    }
-    else
-    {
-        return ItemSptite;
-    }
-}
-
-bool AEdibleSpriteActor::GetIsEatable() const
-{
-    return SpawnActorInfo != nullptr ? SpawnActorInfo->bEatable : false;
-}
+//UPaperSprite* AEdibleSpriteActor::GetEatableActorSprite() const
+//{
+//    if (SpawnActorInfo != nullptr && SpawnActorInfo->ItemSptite != nullptr)
+//    {
+//        return SpawnActorInfo->ItemSptite;
+//    }
+//    else
+//    {
+//        return ItemSptite;
+//    }
+//}
+//
+//bool AEdibleSpriteActor::GetIsEatable() const
+//{
+//    return SpawnActorInfo != nullptr ? SpawnActorInfo->bEatable : false;
+//}

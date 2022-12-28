@@ -9,12 +9,13 @@
 
 class UBoxComponent;
 class USceneComponent;
-class UPaperSprite;
 class AEdibleSpriteActor;
+class ACollectableSpriteActor;
 class UPaperSpriteComponent;
 class UCameraComponent;
 class USpringArmComponent;
 class UDataTable;
+class UPaperSprite;
 
 UCLASS()
 class EDIBLEGAME_API ABorderActor : public AActor
@@ -26,12 +27,9 @@ public:
     void ApplyGameSettings(EGameTheme GameTheme, bool EatableIsOnTheLeft);
     void StartSpawnObjects();
     void StopSpawnObjects();
-   
+
     UFUNCTION()
     void StartGameSession();
-
-    UFUNCTION(BlueprintCallable, Category = "BorderActor")
-    FVector2D GetBackgroundSize() const;
 
     UFUNCTION(BlueprintCallable, Category = "BorderActor")
     inline int32 GetWrongEatableItems() const { return WrongEatableItems; }
@@ -67,25 +65,13 @@ protected:
     UBoxComponent* BottomBorder;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
-    USceneComponent* SpawnPoint1;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
-    USceneComponent* SpawnPoint2;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
-    USceneComponent* SpawnPoint3;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
-    USceneComponent* SpawnPoint4;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
-    USceneComponent* SpawnPoint5;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
     USceneComponent* Root;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
     TSubclassOf<AEdibleSpriteActor> EdibleSpriteClass;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    TSubclassOf<ACollectableSpriteActor> CollectablesClass;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UCameraComponent* CameraComponent;
@@ -93,10 +79,25 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USpringArmComponent* SpringArmComponent;
 
-private:
-    TArray<FSpawnActorInfo> ActorsToSpawn;
-    TArray<USceneComponent*> SpawnPoints;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Settings")
+    float Y_Spawn = 500.0f;
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Settings")
+    float Z_Spawn = 5000.0f;
+    
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Settings")
+    float Z_Max = 3000.0f;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Settings")
+    float Z_Min = -3000.0f;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Settings")
+    float X_Min = -1970.0f;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Settings")
+    float X_Max = 1970.0f;
+
+private:
+    TArray<FSpawnActorInfo> FallingActorsToSpawn;
+    TArray<FSpawnActorInfo> CollectablesToSpawn;
+    
     UPROPERTY(EditDefaultsOnly, Category = "Settings")
     EGameTheme CurrentGameTheme = EGameTheme::Farm;
 
@@ -107,12 +108,21 @@ private:
     UDataTable* SpawnActorDT;
 
     UPROPERTY(EditDefaultsOnly, Category = "Settings")
-    float SpawnRate{1.0f};
+    float FallingSpawnRate{1.0f};
 
-    FTimerHandle SpawnObjectsTimerHandle;
+    UPROPERTY(EditDefaultsOnly, Category = "Settings")
+    float CollectablesSpawnRate{2.5f};
 
-    void SetFallingActorsToSpawn(EGameTheme Theme = EGameTheme::Farm);
-    void SpawnObjects();
+    UPROPERTY(EditDefaultsOnly, Category = "Settings")
+    UPaperSprite* SpritePointer;
+
+    FTimerHandle FallingObjectsTimerHandle;
+    FTimerHandle CollectablesTimerHandle;
+    FTimerHandle CoinsTimerHandle;
+
+    void SetActorsToSpawn(EGameTheme Theme = EGameTheme::Farm);
+    void SpawnFallingObjects();
+    void SpawnCollectables();
 
     UFUNCTION()
     void OnLeftBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -136,5 +146,6 @@ private:
 
     int32 Exp{0};
     int32 Coins{0};
+
 
 };

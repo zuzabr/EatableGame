@@ -3,7 +3,6 @@
 #include "Core/BorderActor.h"
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
-#include "PaperSprite.h"
 #include "PaperSpriteComponent.h"
 #include "Core/EdibleSpriteActor.h"
 #include "Kismet/GameplayStatics.h"
@@ -11,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Core/EdibleGM.h"
 #include "Engine/DataTable.h"
+#include "Core/CollectableSpriteActor.h"
 
 ABorderActor::ABorderActor()
 {
@@ -46,30 +46,13 @@ ABorderActor::ABorderActor()
     TopBorder->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
     TopBorder->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
-    SpawnPoint1 = CreateDefaultSubobject<USceneComponent>("SpawnPoint1");
-    SpawnPoint1->SetupAttachment(Root);
-    SpawnPoint2 = CreateDefaultSubobject<USceneComponent>("SpawnPoint2");
-    SpawnPoint2->SetupAttachment(Root);
-    SpawnPoint3 = CreateDefaultSubobject<USceneComponent>("SpawnPoint3");
-    SpawnPoint3->SetupAttachment(Root);
-    SpawnPoint4 = CreateDefaultSubobject<USceneComponent>("SpawnPoint4");
-    SpawnPoint4->SetupAttachment(Root);
-    SpawnPoint5 = CreateDefaultSubobject<USceneComponent>("SpawnPoint5");
-    SpawnPoint5->SetupAttachment(Root);
-
-    SpawnPoints.Empty();
-    SpawnPoints.Add(SpawnPoint1);
-    SpawnPoints.Add(SpawnPoint2);
-    SpawnPoints.Add(SpawnPoint3);
-    SpawnPoints.Add(SpawnPoint4);
-    SpawnPoints.Add(SpawnPoint5);
-
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
     SpringArmComponent->SetupAttachment(GetRootComponent());
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>("Camera");
     CameraComponent->SetupAttachment(SpringArmComponent);
 }
+
 
 void ABorderActor::BeginPlay()
 {
@@ -79,9 +62,8 @@ void ABorderActor::BeginPlay()
     RightBorder->OnComponentBeginOverlap.AddDynamic(this, &ABorderActor::OnRightBorderBeginOverlap);
     BottomBorder->OnComponentBeginOverlap.AddDynamic(this, &ABorderActor::OnBottomBorderBeginOverlap);
 
-    const auto SpriteSize = GetBackgroundSize();
-    CameraComponent->SetAspectRatio(SpriteSize.X / SpriteSize.Y);
-    SetFallingActorsToSpawn(CurrentGameTheme);
+    CameraComponent->SetAspectRatio(768.f / 1024.f);
+    SetActorsToSpawn(CurrentGameTheme);
 
     if (GetWorld())
     {
@@ -104,16 +86,17 @@ void ABorderActor::ApplyGameSettings(EGameTheme GameTheme, bool EatableIsOnTheLe
     if (CurrentGameTheme != GameTheme)
     {
         CurrentGameTheme = GameTheme;
-        SetFallingActorsToSpawn(GameTheme);
+        SetActorsToSpawn(GameTheme);
     }
     EatableOnLeft = EatableIsOnTheLeft;
 }
 
-void ABorderActor::SetFallingActorsToSpawn(EGameTheme Theme)
+void ABorderActor::SetActorsToSpawn(EGameTheme Theme)
 {
 
     if (SpawnActorDT == nullptr) return;
-    ActorsToSpawn.Empty();
+    FallingActorsToSpawn.Empty();
+    CollectablesToSpawn.Empty();
     static const FString DT_String = FString("Default");
 
     for (const auto& RowName : SpawnActorDT->GetRowNames())
@@ -124,46 +107,80 @@ void ABorderActor::SetFallingActorsToSpawn(EGameTheme Theme)
 
         if (ActorInfo->GameTheme == Theme && ActorInfo->SpawnActorType == ESpawnActorType::FallingActors)
         {
-            ActorsToSpawn.Add(*ActorInfo);
+            FallingActorsToSpawn.Add(*ActorInfo);
+            continue;
+        }
+
+        if (ActorInfo->SpawnActorType != ESpawnActorType::FallingActors)
+        {
+            CollectablesToSpawn.Add(*ActorInfo);
         }
     }
+
 }
 
 void ABorderActor::StartSpawnObjects()
 {
-    if (GetWorldTimerManager().IsTimerActive(SpawnObjectsTimerHandle)) return;
-    GetWorldTimerManager().SetTimer(SpawnObjectsTimerHandle, this, &ABorderActor::SpawnObjects, SpawnRate, true);
+    if (!(GetWorldTimerManager().IsTimerActive(FallingObjectsTimerHandle)))
+    {
+        GetWorldTimerManager().SetTimer(FallingObjectsTimerHandle, this, &ABorderActor::SpawnFallingObjects, FallingSpawnRate, true);
+    }
+
+    if (!(GetWorldTimerManager().IsTimerActive(CollectablesTimerHandle)))
+    {
+        GetWorldTimerManager().SetTimer(CollectablesTimerHandle, this, &ABorderActor::SpawnCollectables, CollectablesSpawnRate, true, 7.0f);
+    }
+   
 }
 
 void ABorderActor::StopSpawnObjects()
 {
-    GetWorldTimerManager().ClearTimer(SpawnObjectsTimerHandle);
+    GetWorldTimerManager().ClearTimer(FallingObjectsTimerHandle);
+    GetWorldTimerManager().ClearTimer(CollectablesTimerHandle);
 }
 
-FVector2D ABorderActor::GetBackgroundSize() const
-{
-    return BackgroundSprite->GetSprite()->GetSourceSize();
-}
-
-void ABorderActor::SpawnObjects()
+void ABorderActor::SpawnFallingObjects()
 {
 
-    int32 RandomIndex = FMath::RandRange(0, ActorsToSpawn.Num() - 1);
-    if (!ActorsToSpawn.IsValidIndex(RandomIndex)) return;
+    int32 RandomIndex = FMath::RandRange(0, FallingActorsToSpawn.Num() - 1);
+    if (!FallingActorsToSpawn.IsValidIndex(RandomIndex)) return;
 
-    int32 RandomPoint = FMath::RandRange(0, SpawnPoints.Num() - 1);
-    if (!SpawnPoints.IsValidIndex(RandomPoint)) return;
+    float X_Spawn = FMath::RandRange(X_Min, X_Max);
 
+    FTransform ActorSpawnTransform;
+    ActorSpawnTransform.SetLocation(FVector(X_Spawn, Y_Spawn, Z_Spawn));
+    ActorSpawnTransform.Rotator() = ActorSpawnTransform.Rotator().ZeroRotator;
+    ActorSpawnTransform.SetScale3D(FVector(1.5f));
+    
     if (!GetWorld()) return;
-
-    const auto Actor =
-        GetWorld()->SpawnActorDeferred<AEdibleSpriteActor>(EdibleSpriteClass, SpawnPoints[RandomPoint]->GetComponentTransform());
+    const auto Actor = GetWorld()->SpawnActorDeferred<AEdibleSpriteActor>(EdibleSpriteClass, ActorSpawnTransform);
     if (Actor)
     {
-
         ++Exp;
-        Actor->SetActorInfo(&(ActorsToSpawn[RandomIndex]));
-        UGameplayStatics::FinishSpawningActor(Actor, SpawnPoints[RandomPoint]->GetComponentTransform());
+        Actor->SetActorInfo(&(FallingActorsToSpawn[RandomIndex]));
+        UGameplayStatics::FinishSpawningActor(Actor, ActorSpawnTransform);
+    }
+}
+
+void ABorderActor::SpawnCollectables()
+{
+    int32 RandomIndex = FMath::RandRange(0, CollectablesToSpawn.Num() - 1);
+    if (!CollectablesToSpawn.IsValidIndex(RandomIndex)) return;
+
+    float X_Spawn = FMath::RandRange(X_Min, X_Max);
+    float Z_Collectable = FMath::RandRange(Z_Min, Z_Max);
+
+    FTransform ActorSpawnTransform;
+    ActorSpawnTransform.SetLocation(FVector(X_Spawn, Y_Spawn, Z_Collectable));
+    ActorSpawnTransform.Rotator() = ActorSpawnTransform.Rotator().ZeroRotator;
+    ActorSpawnTransform.SetScale3D(FVector(1.0f));
+
+    if (!GetWorld()) return;
+    const auto Actor = GetWorld()->SpawnActorDeferred<ACollectableSpriteActor>(CollectablesClass, ActorSpawnTransform);
+    if (Actor)
+    {
+        Actor->SetActorInfo(&(CollectablesToSpawn[RandomIndex]));
+        UGameplayStatics::FinishSpawningActor(Actor, ActorSpawnTransform);
     }
 }
 
