@@ -53,7 +53,6 @@ ABorderActor::ABorderActor()
     CameraComponent->SetupAttachment(SpringArmComponent);
 }
 
-
 void ABorderActor::BeginPlay()
 {
     Super::BeginPlay();
@@ -96,7 +95,7 @@ void ABorderActor::SetActorsToSpawn(EGameTheme Theme)
 
     if (SpawnActorDT == nullptr) return;
     FallingActorsToSpawn.Empty();
-    CollectablesToSpawn.Empty();
+   
     static const FString DT_String = FString("Default");
 
     for (const auto& RowName : SpawnActorDT->GetRowNames())
@@ -108,12 +107,6 @@ void ABorderActor::SetActorsToSpawn(EGameTheme Theme)
         if (ActorInfo->GameTheme == Theme && ActorInfo->SpawnActorType == ESpawnActorType::FallingActors)
         {
             FallingActorsToSpawn.Add(*ActorInfo);
-            continue;
-        }
-
-        if (ActorInfo->SpawnActorType != ESpawnActorType::FallingActors)
-        {
-            CollectablesToSpawn.Add(*ActorInfo);
         }
     }
 
@@ -164,8 +157,8 @@ void ABorderActor::SpawnFallingObjects()
 
 void ABorderActor::SpawnCollectables()
 {
-    int32 RandomIndex = FMath::RandRange(0, CollectablesToSpawn.Num() - 1);
-    if (!CollectablesToSpawn.IsValidIndex(RandomIndex)) return;
+    int32 RandomIndex = FMath::RandRange(0, CollectablesClasses.Num() - 1);
+    if (!CollectablesClasses.IsValidIndex(RandomIndex)) return;
 
     float X_Spawn = FMath::RandRange(X_Min, X_Max);
     float Z_Collectable = FMath::RandRange(Z_Min, Z_Max);
@@ -173,13 +166,13 @@ void ABorderActor::SpawnCollectables()
     FTransform ActorSpawnTransform;
     ActorSpawnTransform.SetLocation(FVector(X_Spawn, Y_Spawn, Z_Collectable));
     ActorSpawnTransform.Rotator() = ActorSpawnTransform.Rotator().ZeroRotator;
-    ActorSpawnTransform.SetScale3D(FVector(1.0f));
+    ActorSpawnTransform.SetScale3D(FVector(1.3f));
 
     if (!GetWorld()) return;
-    const auto Actor = GetWorld()->SpawnActorDeferred<ACollectableSpriteActor>(CollectablesClass, ActorSpawnTransform);
+    const auto Actor =
+        GetWorld()->SpawnActorDeferred<ACollectableSpriteActor>(CollectablesClasses[RandomIndex], ActorSpawnTransform);
     if (Actor)
-    {
-        Actor->SetActorInfo(&(CollectablesToSpawn[RandomIndex]));
+    {       
         UGameplayStatics::FinishSpawningActor(Actor, ActorSpawnTransform);
     }
 }

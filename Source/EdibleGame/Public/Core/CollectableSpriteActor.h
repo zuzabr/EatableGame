@@ -6,14 +6,9 @@
 #include "Core/SpawnableSpriteActor.h"
 #include "CollectableSpriteActor.generated.h"
 
-UCLASS()
+UCLASS(Abstract)
 class EDIBLEGAME_API ACollectableSpriteActor : public ASpawnableSpriteActor
 {
     GENERATED_BODY()
-
-public:
-    virtual void StartInteract() override;
-
-protected:
-    virtual void BeginPlay() override;
+    /*Abstract, Blueprintable*/
 };

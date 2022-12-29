@@ -16,17 +16,17 @@ class EDIBLEGAME_API ASpawnableSpriteActor : public APaperSpriteActor
 
 public:
     bool GetIsEatable() const;
-    void SetActorInfo(const FSpawnActorInfo* SpawnInfo) { SpawnActorInfo = SpawnInfo; }
+    void SetActorInfo(FSpawnActorInfo* SpawnInfo) { SpawnActorInfo = SpawnInfo; }
 
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "EdibleSpriteActor")
-    UPaperSprite* GetEatableActorSprite() const;
+    UPaperSprite* GetEatableActorSprite();
 
     virtual void IntendToDestroy();
     virtual void StartInteract(){};
 
 protected:
-    const FSpawnActorInfo* SpawnActorInfo = nullptr;
+    FSpawnActorInfo* SpawnActorInfo = nullptr;
 
-    UPROPERTY(EditDefaultsOnly, Category = "EdibleSpriteActor")
-    UPaperSprite* ItemSptite;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Info")
+    FDataTableRowHandle ItemInfo;
 };

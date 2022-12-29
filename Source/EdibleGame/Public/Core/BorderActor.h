@@ -67,18 +67,19 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
     USceneComponent* Root;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
-    TSubclassOf<AEdibleSpriteActor> EdibleSpriteClass;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
-    TSubclassOf<ACollectableSpriteActor> CollectablesClass;
-
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UCameraComponent* CameraComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USpringArmComponent* SpringArmComponent;
 
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    TSubclassOf<AEdibleSpriteActor> EdibleSpriteClass;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (NoElementDuplicate), Category = "Settings")
+    TArray<TSubclassOf<ACollectableSpriteActor>> CollectablesClasses;
+   
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Settings")
     float Y_Spawn = 500.0f;
 
@@ -96,7 +97,6 @@ protected:
 
 private:
     TArray<FSpawnActorInfo> FallingActorsToSpawn;
-    TArray<FSpawnActorInfo> CollectablesToSpawn;
     
     UPROPERTY(EditDefaultsOnly, Category = "Settings")
     EGameTheme CurrentGameTheme = EGameTheme::Farm;
@@ -118,8 +118,7 @@ private:
 
     FTimerHandle FallingObjectsTimerHandle;
     FTimerHandle CollectablesTimerHandle;
-    FTimerHandle CoinsTimerHandle;
-
+  
     void SetActorsToSpawn(EGameTheme Theme = EGameTheme::Farm);
     void SpawnFallingObjects();
     void SpawnCollectables();

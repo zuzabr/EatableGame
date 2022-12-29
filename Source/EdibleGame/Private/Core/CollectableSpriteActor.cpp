@@ -3,15 +3,3 @@
 
 #include "Core/CollectableSpriteActor.h"
 
-
-
-void ACollectableSpriteActor::BeginPlay()
-{
-    Super::BeginPlay();
-    SetLifeSpan(2.0f);
-}
-
-void ACollectableSpriteActor::StartInteract()
-{
-    IntendToDestroy();
-}
