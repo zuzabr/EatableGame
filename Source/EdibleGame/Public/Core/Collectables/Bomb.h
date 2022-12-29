@@ -15,8 +15,14 @@ class EDIBLEGAME_API ABomb : public ACollectableSpriteActor
     GENERATED_BODY()
 
 public:
+    ABomb();
     virtual void StartInteract() override;
 
 protected:
     virtual void BeginPlay() override;
+    UFUNCTION()
+    void OnBombDestroyed(AActor* DestroyedActor);
+
+private:
+    bool bNeutralized = false;
 };

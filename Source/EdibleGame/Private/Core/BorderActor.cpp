@@ -109,7 +109,7 @@ void ABorderActor::SetActorsToSpawn(EGameTheme Theme)
             FallingActorsToSpawn.Add(*ActorInfo);
         }
     }
-
+    
 }
 
 void ABorderActor::StartSpawnObjects()
