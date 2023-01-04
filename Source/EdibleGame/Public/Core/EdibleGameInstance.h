@@ -49,6 +49,6 @@ private:
     int32 ThemeIndex{0};
 
     bool bEatableOnLeft = true;
-    EGameTheme GameTheme = EGameTheme::Fruits;
+    EGameTheme GameTheme = EGameTheme::All;
 
 };

@@ -5,7 +5,6 @@
 #include "Core/EdibleHUD.h"
 #include "Core/EdiblePlayerController.h"
 #include "Kismet/GameplayStatics.h"
-//#include "Core/BorderActor.h"
 #include "Core/EdibleGameInstance.h"
 
 AEdibleGM::AEdibleGM()
@@ -69,7 +68,7 @@ void AEdibleGM::GameProgression()
     ++Exp;
 
 // ***********Lose Logic Uncomment, when the game will be ready*****************
-    if ((WrongEatableItems + WrongNonEatableItems + MissedItems)>10)
+    /*if ((WrongEatableItems + WrongNonEatableItems + MissedItems)>10)
     {
         if (GetWorld())
         {
@@ -81,7 +80,7 @@ void AEdibleGM::GameProgression()
             }
         }
         GameLost();
-    }
+    }*/
 
     if (Exp <= 1000.0f)
     {

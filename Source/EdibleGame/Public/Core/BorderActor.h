@@ -25,12 +25,14 @@ class EDIBLEGAME_API ABorderActor : public AActor
 
 public:
     ABorderActor();
-    void ApplyGameSettings(EGameTheme GameTheme, bool EatableIsOnTheLeft);
     void StartSpawnObjects();
     void StopSpawnObjects();
 
     UFUNCTION()
     void StartGameSession();
+
+    UFUNCTION(BlueprintCallable, BlueprintPure, Category = "EdibleSpriteActor")
+    UPaperSprite* GetBackgroundSprite() const;
 
 protected:
     virtual void BeginPlay() override;
@@ -65,8 +67,11 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (NoElementDuplicate), Category = "Settings")
     TArray<TSubclassOf<ACollectableSpriteActor>> CollectablesClasses;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+    TMap<EGameTheme, UPaperSprite*> BackgroundThemes;
    
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Settings")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
     float Y_Spawn = 500.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
@@ -80,16 +85,17 @@ protected:
     float X_Min = -1970.0f;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
     float X_Max = 1970.0f;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+    EGameTheme CurrentGameTheme = EGameTheme::All;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+    bool EatableOnLeft = true;
 
 private:
     TArray<FSpawnActorInfo> FallingActorsToSpawn;
     AEdibleGM* GameMode;
     
-    UPROPERTY(EditDefaultsOnly, Category = "Settings")
-    EGameTheme CurrentGameTheme = EGameTheme::Fruits;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Settings")
-    bool EatableOnLeft = true;
+    
+    
 
     UPROPERTY(EditDefaultsOnly, Category = "Settings")
     UDataTable* SpawnActorDT;
@@ -100,8 +106,8 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Settings")
     float CollectablesSpawnRate{5.5f};
 
-    UPROPERTY(EditDefaultsOnly, Category = "Settings")
-    UPaperSprite* SpritePointer;
+   /* UPROPERTY(EditDefaultsOnly, Category = "Settings")
+    UPaperSprite* SpritePointer;*/
 
     FTimerHandle FallingObjectsTimerHandle;
     FTimerHandle CollectablesTimerHandle;
@@ -121,8 +127,5 @@ private:
     UFUNCTION()
     void OnBottomBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
         int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-    
-
 
 };

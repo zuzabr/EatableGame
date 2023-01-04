@@ -52,10 +52,24 @@ ABorderActor::ABorderActor()
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>("Camera");
     CameraComponent->SetupAttachment(SpringArmComponent);
+
+    
 }
 
 void ABorderActor::BeginPlay()
 {
+    if (GetWorld())
+    {
+        const auto GameInst = GetWorld()->GetGameInstance<UEdibleGameInstance>();
+        if (GameInst)
+        {
+            UE_LOG(LogTemp, Display, TEXT("GameInst Settings"));
+            CurrentGameTheme = GameInst->GetGameTheme();
+            BackgroundSprite->SetSprite(GetBackgroundSprite());
+            EatableOnLeft = GameInst->GetEatableOnLeft();
+        }
+    }
+ 
     Super::BeginPlay();
 
     LeftBorder->OnComponentBeginOverlap.AddDynamic(this, &ABorderActor::OnLeftBorderBeginOverlap);
@@ -73,31 +87,22 @@ void ABorderActor::BeginPlay()
             GameMode->OnGameStarted.AddUObject(this, &ABorderActor::StartGameSession);
         }
     }
+    
 }
 
 void ABorderActor::StartGameSession()
-{
-    if (GetWorld())
-    {
-        const auto GameInst = GetWorld()->GetGameInstance<UEdibleGameInstance>();
-        if (GameInst)
-        {
-            CurrentGameTheme = GameInst->GetGameTheme();
-            EatableOnLeft = GameInst->GetEatableOnLeft();
-        }
-    }
-    ApplyGameSettings(CurrentGameTheme, EatableOnLeft);
+{    
+    
+
+    SetActorsToSpawn(CurrentGameTheme);
     StartSpawnObjects();
 }
 
-void ABorderActor::ApplyGameSettings(EGameTheme GameTheme, bool EatableIsOnTheLeft)
+UPaperSprite* ABorderActor::GetBackgroundSprite() const
 {
-    if (CurrentGameTheme != GameTheme)
-    {
-        CurrentGameTheme = GameTheme;
-        SetActorsToSpawn(GameTheme);
-    }
-    EatableOnLeft = EatableIsOnTheLeft;
+    if (!BackgroundThemes.Contains(CurrentGameTheme)) return nullptr;
+    const auto Background = BackgroundThemes[CurrentGameTheme];
+    return (Background != nullptr) ? Background : nullptr;
 }
 
 void ABorderActor::SetActorsToSpawn(EGameTheme Theme)

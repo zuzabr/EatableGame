@@ -83,7 +83,7 @@ void USettingsWidget::ApplySettings()
         const auto GameInst = GetWorld()->GetGameInstance<UEdibleGameInstance>();
         if (GameInst)
         {
-            GameInst->SetGameTheme(CurrentTheme);
+            GameInst->SetGameTheme(static_cast<EGameTheme>(CurrentIndex));
             GameInst->SetThemeIndex(CurrentIndex);
             GameInst->SetEatableOnLeft(EatableOnLeft);
         }
