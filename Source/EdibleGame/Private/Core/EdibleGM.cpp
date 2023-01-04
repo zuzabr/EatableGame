@@ -5,7 +5,8 @@
 #include "Core/EdibleHUD.h"
 #include "Core/EdiblePlayerController.h"
 #include "Kismet/GameplayStatics.h"
-#include "Core/BorderActor.h"
+//#include "Core/BorderActor.h"
+#include "Core/EdibleGameInstance.h"
 
 AEdibleGM::AEdibleGM()
 {
@@ -49,14 +50,49 @@ void AEdibleGM::StartGame()
     }
     OnGameStarted.Broadcast();
     SetMatchState(EMatchState::InProgress);
+
+    if (!(GetWorldTimerManager().IsTimerActive(MatchProgressionTimerHandle)))
+    {
+        GetWorldTimerManager().SetTimer(MatchProgressionTimerHandle, this, &AEdibleGM::GameProgression, ExpCountRate, true);
+    }
 }
 
 void AEdibleGM::GameLost()
 {
-    SetMatchState(EMatchState::Lose);
+    GetWorldTimerManager().ClearTimer(MatchProgressionTimerHandle);
+    SetPause(GetWorld()->GetFirstPlayerController());
+    SetMatchState(EMatchState::Lose);    
 }
 
+void AEdibleGM::GameProgression()
+{
+    ++Exp;
 
+// ***********Lose Logic Uncomment, when the game will be ready*****************
+    if ((WrongEatableItems + WrongNonEatableItems + MissedItems)>10)
+    {
+        if (GetWorld())
+        {
+            const auto GameInst = GetWorld()->GetGameInstance<UEdibleGameInstance>();
+            if (GameInst)
+            {
+                GameInst->SetCoins(Coins);
+                GameInst->SetExp(Exp);
+            }
+        }
+        GameLost();
+    }
+
+    if (Exp <= 1000.0f)
+    {
+        TRange<float> In (0.0f, 1000.0f);
+        TRange<float> Out (0.8f, 4.0f);
+        const auto Rate = FMath::GetMappedRangeValueClamped(In, Out, Exp);
+        UGameplayStatics::SetGlobalTimeDilation(this, Rate);
+        UE_LOG(LogTemp, Display, TEXT("Dilation : %f"), UGameplayStatics::GetGlobalTimeDilation(this));
+        
+    }
+}
 
 
 void AEdibleGM::SetMatchState(EMatchState State)

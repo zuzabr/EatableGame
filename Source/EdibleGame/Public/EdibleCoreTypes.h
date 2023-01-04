@@ -23,11 +23,13 @@ DECLARE_MULTICAST_DELEGATE(FOnGameStarted);
 UENUM(BlueprintType)
 enum class EGameTheme : uint8
 {
-    None = 0,
-    Farm,
-    Space,
-    UnderWater,
-    Town
+    All = 0,
+    Fruits,
+    Vegetables,
+    Meat,
+    Sweets,
+    FastFood,
+    DairyProducts
 };
 
 UENUM(BlueprintType)

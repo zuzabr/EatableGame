@@ -11,6 +11,7 @@
 #include "Core/EdibleGM.h"
 #include "Engine/DataTable.h"
 #include "Core/CollectableSpriteActor.h"
+#include "Core/EdibleGameInstance.h"
 
 ABorderActor::ABorderActor()
 {
@@ -66,7 +67,7 @@ void ABorderActor::BeginPlay()
 
     if (GetWorld())
     {
-        const auto GameMode = Cast<AEdibleGM>(GetWorld()->GetAuthGameMode());
+        GameMode = Cast<AEdibleGM>(GetWorld()->GetAuthGameMode());
         if (GameMode)
         {
             GameMode->OnGameStarted.AddUObject(this, &ABorderActor::StartGameSession);
@@ -76,7 +77,16 @@ void ABorderActor::BeginPlay()
 
 void ABorderActor::StartGameSession()
 {
-    ApplyGameSettings(CurrentGameTheme, true);
+    if (GetWorld())
+    {
+        const auto GameInst = GetWorld()->GetGameInstance<UEdibleGameInstance>();
+        if (GameInst)
+        {
+            CurrentGameTheme = GameInst->GetGameTheme();
+            EatableOnLeft = GameInst->GetEatableOnLeft();
+        }
+    }
+    ApplyGameSettings(CurrentGameTheme, EatableOnLeft);
     StartSpawnObjects();
 }
 
@@ -104,9 +114,22 @@ void ABorderActor::SetActorsToSpawn(EGameTheme Theme)
 
         if (!ActorInfo) continue;
 
-        if (ActorInfo->GameTheme == Theme && ActorInfo->SpawnActorType == ESpawnActorType::FallingActors)
+        if (Theme == EGameTheme::All)
         {
-            FallingActorsToSpawn.Add(*ActorInfo);
+            if (ActorInfo->SpawnActorType == ESpawnActorType::FallingActors)
+            {
+                FallingActorsToSpawn.Add(*ActorInfo);
+            }
+            
+        }
+        else 
+        {
+            if ((ActorInfo->GameTheme == EGameTheme::All || ActorInfo->GameTheme == Theme) &&
+                ActorInfo->SpawnActorType == ESpawnActorType::FallingActors)
+            {
+                FallingActorsToSpawn.Add(*ActorInfo);
+            }
+            
         }
     }
     
@@ -149,7 +172,6 @@ void ABorderActor::SpawnFallingObjects()
     const auto Actor = GetWorld()->SpawnActorDeferred<AEdibleSpriteActor>(EdibleSpriteClass, ActorSpawnTransform);
     if (Actor)
     {
-        ++Exp;
         Actor->SetActorInfo(&(FallingActorsToSpawn[RandomIndex]));
         UGameplayStatics::FinishSpawningActor(Actor, ActorSpawnTransform);
     }
@@ -177,6 +199,7 @@ void ABorderActor::SpawnCollectables()
     }
 }
 
+
 void ABorderActor::OnLeftBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
     int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -188,22 +211,35 @@ void ABorderActor::OnLeftBorderBeginOverlap(UPrimitiveComponent* OverlappedCompo
     {
         if (bEatable)
         {
-            ++RightEatableItems;
+            if (GameMode)
+            {
+                GameMode->AddRightEatableItems(1);
+            }
+            
         }
         else
         {
-            ++WrongEatableItems;
+            if (GameMode)
+            {
+                GameMode->AddWrongEatableItems(1);
+            }
         }
     }
     else
     {
         if (bEatable)
         {
-            ++WrongEatableItems;
+            if (GameMode)
+            {
+                GameMode->AddWrongEatableItems(1);
+            }
         }
         else
         {
-            ++RightEatableItems;
+            if (GameMode)
+            {
+                GameMode->AddRightEatableItems(1);
+            }
         }
     }
     OverlappedActor->IntendToDestroy();
@@ -221,22 +257,34 @@ void ABorderActor::OnRightBorderBeginOverlap(UPrimitiveComponent* OverlappedComp
     {
         if (bEatable)
         {
-            ++WrongNonEatableItems;
+            if (GameMode)
+            {
+                GameMode->AddWrongNonEatableItems(1);
+            }
         }
         else
         {
-            ++RightNonEatableItems;
+            if (GameMode)
+            {
+                GameMode->AddRightNonEatableItems(1);
+            }
         }
     }
     else
     {
         if (bEatable)
         {
-            ++RightNonEatableItems;
+            if (GameMode)
+            {
+                GameMode->AddRightNonEatableItems(1);
+            }
         }
         else
         {
-            ++WrongNonEatableItems;
+            if (GameMode)
+            {
+                GameMode->AddWrongNonEatableItems(1);
+            }
         }
     }
     OverlappedActor->IntendToDestroy();
@@ -248,6 +296,9 @@ void ABorderActor::OnBottomBorderBeginOverlap(UPrimitiveComponent* OverlappedCom
 {
     auto OverlappedActor = Cast<AEdibleSpriteActor>(OtherActor);
     if (!OverlappedActor) return;
-    ++MissedItems;
+    if (GameMode)
+    {
+        GameMode->AddMissedItems(1);
+    }
     OverlappedActor->IntendToDestroy();
 }

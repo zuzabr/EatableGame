@@ -7,7 +7,7 @@
 #include "GameProgressWidget.generated.h"
 
 class UButton;
-class ABorderActor;
+class AEdibleGM;
 
 UCLASS()
 class EDIBLEGAME_API UGameProgressWidget : public UUserWidget
@@ -20,12 +20,14 @@ protected:
     UPROPERTY(meta = (BindWidget))
     UButton* PauseButton;
 
-    UPROPERTY(BlueprintReadOnly, Category = "Default")
-    ABorderActor* Border;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Eatable GM")
+    AEdibleGM* GameMode;
+
+    UFUNCTION(BlueprintCallable)
+    bool GetEatableOnLeft() const;
 
 private:
     UFUNCTION()
     void OnPauseSet();
 
-    
 };

@@ -42,6 +42,6 @@ void ABomb::OnBombDestroyed(AActor* DestroyedActor)
 
 void ABomb::StartInteract()
 {
-    bNeutralized = true;
+    bNeutralized = false;
     Destroy();
 }

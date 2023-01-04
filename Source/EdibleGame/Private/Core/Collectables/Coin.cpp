@@ -2,6 +2,7 @@
 
 
 #include "Core/Collectables/Coin.h"
+#include "Core/EdibleGM.h"
 
 void ACoin::BeginPlay()
 {
@@ -11,5 +12,13 @@ void ACoin::BeginPlay()
 
 void ACoin::StartInteract()
 {
-    IntendToDestroy();
+    if (GetWorld())
+    {
+        const auto GameMode = Cast<AEdibleGM>(GetWorld()->GetAuthGameMode());
+        if (GameMode)
+        {
+            GameMode->AddCoins(1);
+        }
+    }
+    Destroy();
 }

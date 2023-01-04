@@ -20,16 +20,10 @@ class EDIBLEGAME_API AEdibleSpriteActor : public ASpawnableSpriteActor
 public:
     AEdibleSpriteActor();
 
-    /*bool GetIsEatable() const;
-    void SetActorInfo(const FSpawnActorInfo* SpawnInfo) { SpawnActorInfo = SpawnInfo; }
-
-    UFUNCTION(BlueprintCallable, BlueprintPure, Category = "EdibleSpriteActor")
-    UPaperSprite* GetEatableActorSprite() const;*/
-
     void StartToGrabActor(UPrimitiveComponent* Comp, FVector Location, ETouchIndex::Type FingerIndex);
     void StopGrabActor();
     void UpdateActorLocation();
-
+    
     virtual void IntendToDestroy() override;
 
 protected:

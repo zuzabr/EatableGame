@@ -24,5 +24,5 @@ protected:
     void OnBombDestroyed(AActor* DestroyedActor);
 
 private:
-    bool bNeutralized = false;
+    bool bNeutralized = true;
 };

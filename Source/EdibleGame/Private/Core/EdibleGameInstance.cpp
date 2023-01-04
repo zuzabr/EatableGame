@@ -3,3 +3,8 @@
 
 #include "Core/EdibleGameInstance.h"
 
+void UEdibleGameInstance::SetExp(int32 Exp)
+{
+    CurrentExp = Exp;
+    FMath::Max(Exp, MaxExp);
+}

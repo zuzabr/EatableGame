@@ -16,6 +16,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class UDataTable;
 class UPaperSprite;
+class AEdibleGM;
 
 UCLASS()
 class EDIBLEGAME_API ABorderActor : public AActor
@@ -30,21 +31,6 @@ public:
 
     UFUNCTION()
     void StartGameSession();
-
-    UFUNCTION(BlueprintCallable, Category = "BorderActor")
-    inline int32 GetWrongEatableItems() const { return WrongEatableItems; }
-    UFUNCTION(BlueprintCallable, Category = "BorderActor")
-    inline int32 GetRightEatableItems() const { return RightEatableItems; }
-    UFUNCTION(BlueprintCallable, Category = "BorderActor")
-    inline int32 GetWrongNonEatableItems() const { return WrongNonEatableItems; }
-    UFUNCTION(BlueprintCallable, Category = "BorderActor")
-    inline int32 GetRightNonEatableItems() const { return RightNonEatableItems; }
-    UFUNCTION(BlueprintCallable, Category = "BorderActor")
-    inline int32 GetMissedItems() const { return MissedItems; }
-    UFUNCTION(BlueprintCallable, Category = "BorderActor")
-    inline int32 GetExp() const { return Exp; }
-    UFUNCTION(BlueprintCallable, Category = "BorderActor")
-    inline int32 GetCoins() const { return Coins; };
 
 protected:
     virtual void BeginPlay() override;
@@ -83,23 +69,24 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Settings")
     float Y_Spawn = 500.0f;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Settings")
-    float Z_Spawn = 5000.0f;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+    float Z_Spawn = 4500.0f;
     
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Settings")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
     float Z_Max = 3000.0f;
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Settings")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
     float Z_Min = -3000.0f;
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Settings")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
     float X_Min = -1970.0f;
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Settings")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
     float X_Max = 1970.0f;
 
 private:
     TArray<FSpawnActorInfo> FallingActorsToSpawn;
+    AEdibleGM* GameMode;
     
     UPROPERTY(EditDefaultsOnly, Category = "Settings")
-    EGameTheme CurrentGameTheme = EGameTheme::Farm;
+    EGameTheme CurrentGameTheme = EGameTheme::Fruits;
 
     UPROPERTY(EditDefaultsOnly, Category = "Settings")
     bool EatableOnLeft = true;
@@ -111,7 +98,7 @@ private:
     float FallingSpawnRate{1.0f};
 
     UPROPERTY(EditDefaultsOnly, Category = "Settings")
-    float CollectablesSpawnRate{2.5f};
+    float CollectablesSpawnRate{5.5f};
 
     UPROPERTY(EditDefaultsOnly, Category = "Settings")
     UPaperSprite* SpritePointer;
@@ -119,7 +106,7 @@ private:
     FTimerHandle FallingObjectsTimerHandle;
     FTimerHandle CollectablesTimerHandle;
   
-    void SetActorsToSpawn(EGameTheme Theme = EGameTheme::Farm);
+    void SetActorsToSpawn(EGameTheme Theme = EGameTheme::All);
     void SpawnFallingObjects();
     void SpawnCollectables();
 
@@ -135,16 +122,7 @@ private:
     void OnBottomBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
         int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-    int32 WrongEatableItems{0};
-    int32 RightEatableItems{0};
-
-    int32 WrongNonEatableItems{0};
-    int32 RightNonEatableItems{0};
-
-    int32 MissedItems{0};
-
-    int32 Exp{0};
-    int32 Coins{0};
+    
 
 
 };

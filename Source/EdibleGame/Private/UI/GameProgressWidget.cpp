@@ -1,11 +1,9 @@
 // Zuzabr Games 2022 All Rights Reserved
 
-
 #include "UI/GameProgressWidget.h"
 #include "Components/Button.h"
 #include "Core/EdibleGM.h"
-#include "Core/BorderActor.h"
-#include "Kismet/GameplayStatics.h"
+#include "Core/EdibleGameInstance.h"
 
 void UGameProgressWidget::NativeOnInitialized()
 {
@@ -16,14 +14,24 @@ void UGameProgressWidget::NativeOnInitialized()
         PauseButton->OnPressed.AddDynamic(this, &UGameProgressWidget::OnPauseSet);
     }
 
-    Border = Cast<ABorderActor>(UGameplayStatics::GetActorOfClass(this, ABorderActor::StaticClass()));
-    
+    if (GetWorld())
+    {
+        GameMode = Cast<AEdibleGM>(GetWorld()->GetAuthGameMode());
+    }
+}
+
+bool UGameProgressWidget::GetEatableOnLeft() const
+{
+    if (!GetWorld()) return true;
+
+    const auto GameInst = GetWorld()->GetGameInstance<UEdibleGameInstance>();
+    if (!GameInst) return true;
+    return GameInst->GetEatableOnLeft();
 }
 
 void UGameProgressWidget::OnPauseSet()
 {
-    if (!GetWorld() || !GetWorld()->GetAuthGameMode()) return;
-    const auto GameMode = Cast<AEdibleGM>(GetWorld()->GetAuthGameMode());
+
     if (GameMode && GetOwningPlayer())
     {
         GameMode->SetPause(GetOwningPlayer());
