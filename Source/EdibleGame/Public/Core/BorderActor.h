@@ -101,7 +101,7 @@ private:
     UDataTable* SpawnActorDT;
 
     UPROPERTY(EditDefaultsOnly, Category = "Settings")
-    float FallingSpawnRate{1.0f};
+    float FallingSpawnRate{1.2f};
 
     UPROPERTY(EditDefaultsOnly, Category = "Settings")
     float CollectablesSpawnRate{5.5f};

@@ -66,6 +66,7 @@ private:
     float Exp{0};
     int32 Coins{0};
 
+    float TimeMultiplier{0.0f};
     float ExpCountRate{1.f};
    
 

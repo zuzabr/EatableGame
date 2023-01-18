@@ -66,6 +66,7 @@ void AEdibleGM::GameLost()
 void AEdibleGM::GameProgression()
 {
     ++Exp;
+    TimeMultiplier += 10.f;
 
 // ***********Lose Logic Uncomment, when the game will be ready*****************
     /*if ((WrongEatableItems + WrongNonEatableItems + MissedItems)>10)
@@ -82,10 +83,10 @@ void AEdibleGM::GameProgression()
         GameLost();
     }*/
 
-    if (Exp <= 1000.0f)
+    if (TimeMultiplier <= 1000.0f)
     {
         TRange<float> In (0.0f, 1000.0f);
-        TRange<float> Out (0.8f, 4.0f);
+        TRange<float> Out (1.2f, 4.0f);
         const auto Rate = FMath::GetMappedRangeValueClamped(In, Out, Exp);
         UGameplayStatics::SetGlobalTimeDilation(this, Rate);
         UE_LOG(LogTemp, Display, TEXT("Dilation : %f"), UGameplayStatics::GetGlobalTimeDilation(this));
