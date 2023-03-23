@@ -53,6 +53,9 @@ protected:
     UBoxComponent* BottomBorder;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+    UBoxComponent* BackBorder;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
     USceneComponent* Root;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -73,7 +76,6 @@ protected:
    
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
     float Y_Spawn = 500.0f;
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
     float Z_Spawn = 4500.0f;
     
@@ -101,10 +103,16 @@ private:
     UDataTable* SpawnActorDT;
 
     UPROPERTY(EditDefaultsOnly, Category = "Settings")
-    float FallingSpawnRate{1.2f};
+    float FallingSpawnRate{1.3f};
 
     UPROPERTY(EditDefaultsOnly, Category = "Settings")
     float CollectablesSpawnRate{5.5f};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Settings")
+    float FallingActorScale{1.2f};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Settings")
+    float CollectablesActorScale{1.6f};
 
    /* UPROPERTY(EditDefaultsOnly, Category = "Settings")
     UPaperSprite* SpritePointer;*/
@@ -127,5 +135,7 @@ private:
     UFUNCTION()
     void OnBottomBorderBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
         int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+    
 
 };
